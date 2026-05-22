@@ -8,7 +8,7 @@ import {
   useReducer,
   type ReactNode,
 } from 'react';
-import { auth, isFirebaseConfigured } from '../services/firebase';
+import { auth, isFirebaseConfigured, missingFirebaseEnvKeys } from '../services/firebase';
 import { loginWithEmailPassword } from '../services/auth';
 
 interface AuthState {
@@ -27,6 +27,7 @@ interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isFirebaseConfigured: boolean;
+  missingFirebaseEnvKeys: readonly string[];
   role: 'admin' | 'doctor';
   isAdmin: boolean;
   isDoctor: boolean;
@@ -88,7 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'AUTH_INIT', payload: null });
       dispatch({
         type: 'AUTH_ERROR',
-        payload: 'Firebase is not configured. Set VITE_FIREBASE_* variables.',
+        payload:
+          missingFirebaseEnvKeys.length > 0
+            ? `Firebase is not configured. Missing: ${missingFirebaseEnvKeys.join(', ')}. Create .env.local in the project root, then restart npm run dev.`
+            : 'Firebase is not configured. Set VITE_FIREBASE_* variables.',
       });
       return;
     }
@@ -131,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         isFirebaseConfigured,
+        missingFirebaseEnvKeys,
         role,
         isAdmin: role === 'admin',
         isDoctor: role === 'doctor',

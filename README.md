@@ -204,10 +204,35 @@ src/
    ```
 3. Fill Firebase values in `.env.local`.
 4. Enable Firebase Authentication -> Email/Password.
-5. Run app:
+5. Verify env file (on every new machine):
+   ```bash
+   npm run verify-env
+   ```
+6. Run app:
    ```bash
    npm run dev
    ```
+
+### Firebase still not configured?
+
+Run these in the **project root** (where `package.json` lives):
+
+```bash
+npm run verify-env
+npm run dev
+```
+
+If `verify-env` fails:
+
+| Problem | Fix |
+|--------|-----|
+| `.env.local` missing | `cp .env.example .env.local` and paste Firebase values |
+| Wrong folder | `cd` into the cloned repo root, not a parent folder |
+| Windows saved as `.env.local.txt` | Enable "File name extensions", rename to `.env.local` |
+| Dev server already running | Stop it (Ctrl+C), then `npm run dev` again |
+| Vercel / production URL | Add the same `VITE_FIREBASE_*` vars in Vercel -> Settings -> Environment Variables, then redeploy |
+
+`.env.local` is **not** in Git (ignored by `*.local`). You must create it on every laptop.
 
 ## Scripts
 
@@ -215,6 +240,7 @@ src/
 - `npm run build` - type-check + production build
 - `npm run preview` - preview built app
 - `npm run lint` - run lint checks
+- `npm run verify-env` - check `.env.local` exists and has all Firebase keys
 
 ## Demo Credentials
 

@@ -9,7 +9,8 @@ import { validateLoginForm } from '../utils/validators';
 import loginHero from '../assets/login-hero.svg';
 
 export default function LoginPage() {
-  const { user, login, loading, error, isFirebaseConfigured } = useAuth();
+  const { user, login, loading, error, isFirebaseConfigured, missingFirebaseEnvKeys } =
+    useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -89,7 +90,13 @@ export default function LoginPage() {
             </button>
             {error ? <p className="error">{error}</p> : null}
             {!isFirebaseConfigured ? (
-              <p className="error">Configure Firebase credentials in `.env.local` before login.</p>
+              <p className="error">
+                Configure Firebase in <code>.env.local</code> (same folder as <code>package.json</code>
+                ), then restart <code>npm run dev</code>.
+                {missingFirebaseEnvKeys.length > 0
+                  ? ` Missing: ${missingFirebaseEnvKeys.join(', ')}.`
+                  : null}
+              </p>
             ) : null}
             <Button
               type="submit"
