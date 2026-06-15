@@ -61,22 +61,33 @@ export const AuthContext = createContext<AuthContextValue | undefined>(
 
 const mapAuthError = (error: unknown): string => {
   const authError = error as AuthError;
-  if (authError?.code === 'auth/invalid-credential') {
-    return 'Invalid email or password.';
+  const code = authError?.code;
+
+  switch (code) {
+    case 'auth/invalid-credential':
+      return 'Invalid email or password.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Try again later.';
+    case 'auth/popup-closed-by-user':
+      return 'Google sign-in was cancelled.';
+    case 'auth/popup-blocked':
+      return 'Popup blocked. Allow popups for this site and try again.';
+    case 'auth/account-exists-with-different-credential':
+      return 'This email is registered with email/password. Sign in with email instead.';
+    case 'auth/unauthorized-domain':
+      return 'This domain is not authorized in Firebase. Add your Vercel URL (e.g. your-app.vercel.app) under Authentication → Settings → Authorized domains.';
+    case 'auth/operation-not-allowed':
+      return 'Google sign-in is not enabled. Turn on Google in Firebase Authentication → Sign-in method.';
+    case 'auth/network-request-failed':
+      return 'Network error. Check your connection and try again.';
+    case 'auth/internal-error':
+      return 'Google sign-in failed. Enable Google in Firebase and add your Vercel domain to Authorized domains.';
+    default:
+      if (code) {
+        return `Unable to sign in (${code}). Check Firebase Google sign-in and authorized domains.`;
+      }
+      return 'Unable to sign in. Please try again.';
   }
-  if (authError?.code === 'auth/too-many-requests') {
-    return 'Too many attempts. Try again later.';
-  }
-  if (authError?.code === 'auth/popup-closed-by-user') {
-    return 'Google sign-in was cancelled.';
-  }
-  if (authError?.code === 'auth/popup-blocked') {
-    return 'Popup blocked. Allow popups for this site and try again.';
-  }
-  if (authError?.code === 'auth/account-exists-with-different-credential') {
-    return 'This email is registered with email/password. Sign in with email instead.';
-  }
-  return 'Unable to sign in. Please try again.';
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
