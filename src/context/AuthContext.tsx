@@ -118,18 +118,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    dispatch({ type: 'AUTH_LOADING', payload: true });
-
     void completeGoogleRedirectSignIn()
       .catch((error) => {
         dispatch({ type: 'AUTH_ERROR', payload: mapAuthError(error) });
-      })
-      .finally(() => {
-        dispatch({ type: 'AUTH_LOADING', payload: false });
       });
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       dispatch({ type: 'AUTH_INIT', payload: user });
+      dispatch({ type: 'AUTH_LOADING', payload: false });
     });
 
     return () => unsubscribe();
@@ -152,8 +148,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'AUTH_LOADING', payload: true });
     dispatch({ type: 'AUTH_ERROR', payload: null });
     try {
-      await loginWithGoogle();
-      // Page redirects to Google; loading stays true until return.
+      const credential = await loginWithGoogle();
+      // Popup sign-in finished; redirect keeps loading until the page returns.
+      if (credential) {
+        dispatch({ type: 'AUTH_LOADING', payload: false });
+      }
     } catch (error) {
       dispatch({ type: 'AUTH_ERROR', payload: mapAuthError(error) });
       dispatch({ type: 'AUTH_LOADING', payload: false });
