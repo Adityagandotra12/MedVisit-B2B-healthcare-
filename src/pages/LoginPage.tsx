@@ -29,12 +29,12 @@ export default function LoginPage() {
 
   const formError = useMemo(() => validateLoginForm(email, password), [email, password]);
 
-  if (!authReady || loading) {
+  if (!authReady) {
     return (
       <section className="auth-shell">
         <Loader />
         <p style={{ textAlign: 'center', marginTop: '0.75rem', color: 'var(--text-secondary)' }}>
-          {googleLoading ? 'Completing Google sign-in...' : 'Loading...'}
+          Completing sign-in...
         </p>
       </section>
     );

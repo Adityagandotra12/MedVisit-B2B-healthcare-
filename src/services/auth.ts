@@ -1,6 +1,8 @@
 import {
+  browserLocalPersistence,
   getRedirectResult,
   GoogleAuthProvider,
+  setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
   signInWithRedirect,
@@ -24,6 +26,7 @@ export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
   const authInstance = assertFirebaseAuth();
+  await setPersistence(authInstance, browserLocalPersistence);
 
   // Popups often fail silently on deployed sites after account selection.
   if (import.meta.env.PROD) {
