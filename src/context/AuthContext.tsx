@@ -125,8 +125,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     void completeGoogleRedirectSignIn()
       .then((result) => {
-        if (result?.user) {
-          dispatch({ type: 'AUTH_INIT', payload: result.user });
+        const signedInUser = result?.user ?? auth.currentUser;
+        if (signedInUser) {
+          dispatch({ type: 'AUTH_INIT', payload: signedInUser });
         }
       })
       .catch((error) => {
