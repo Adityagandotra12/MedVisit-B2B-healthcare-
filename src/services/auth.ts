@@ -25,13 +25,17 @@ export async function loginWithGoogle() {
   provider.setCustomParameters({ prompt: 'select_account' });
   const authInstance = assertFirebaseAuth();
 
+  // Popups often fail silently on deployed sites after account selection.
+  if (import.meta.env.PROD) {
+    await signInWithRedirect(authInstance, provider);
+    return;
+  }
+
   try {
-    // Popup works best for local dev; fast and no full-page redirect.
     return await signInWithPopup(authInstance, provider);
   } catch (error) {
     const authError = error as AuthError;
     if (authError?.code === 'auth/popup-blocked') {
-      // Fallback for Vercel / browsers that block popups.
       await signInWithRedirect(authInstance, provider);
       return;
     }

@@ -7,10 +7,19 @@ import { Input } from '../components/common/Input';
 import { useAuth } from '../hooks/useAuth';
 import { validateLoginForm } from '../utils/validators';
 import loginHero from '../assets/login-hero.svg';
+import { Loader } from '../components/common/Loader';
 
 export default function LoginPage() {
-  const { user, login, loginWithGoogle, loading, error, isFirebaseConfigured, missingFirebaseEnvKeys } =
-    useAuth();
+  const {
+    user,
+    authReady,
+    login,
+    loginWithGoogle,
+    loading,
+    error,
+    isFirebaseConfigured,
+    missingFirebaseEnvKeys,
+  } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +28,17 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const formError = useMemo(() => validateLoginForm(email, password), [email, password]);
+
+  if (!authReady || loading) {
+    return (
+      <section className="auth-shell">
+        <Loader />
+        <p style={{ textAlign: 'center', marginTop: '0.75rem', color: 'var(--text-secondary)' }}>
+          {googleLoading ? 'Completing Google sign-in...' : 'Loading...'}
+        </p>
+      </section>
+    );
+  }
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
