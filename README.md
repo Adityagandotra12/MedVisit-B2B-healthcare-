@@ -203,7 +203,10 @@ src/
    cp .env.example .env.local
    ```
 3. Fill Firebase values in `.env.local`.
-4. Enable Firebase Authentication -> Email/Password.
+4. Enable Firebase Authentication:
+   - **Email/Password** sign-in provider
+   - **Google** sign-in provider (Authentication -> Sign-in method -> Google -> Enable)
+   - Add your domains under Authentication -> Settings -> **Authorized domains** (`localhost`, your Vercel URL)
 5. Verify env file (on every new machine):
    ```bash
    npm run verify-env

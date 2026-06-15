@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa6';
+import { FaEye, FaEyeSlash, FaGoogle } from 'react-icons/fa6';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { Input } from '../components/common/Input';
@@ -9,7 +9,7 @@ import { validateLoginForm } from '../utils/validators';
 import loginHero from '../assets/login-hero.svg';
 
 export default function LoginPage() {
-  const { user, login, loading, error, isFirebaseConfigured, missingFirebaseEnvKeys } =
+  const { user, login, loginWithGoogle, loading, error, isFirebaseConfigured, missingFirebaseEnvKeys } =
     useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +32,14 @@ export default function LoginPage() {
     setLocalErrors({});
     try {
       await login(email, password);
+    } catch {
+      // Error already tracked by context state.
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await loginWithGoogle();
     } catch {
       // Error already tracked by context state.
     }
@@ -104,6 +112,19 @@ export default function LoginPage() {
               style={{ width: '100%', marginTop: '0.6rem' }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
+            </Button>
+            <div className="login-divider">
+              <span>or</span>
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={loading || !isFirebaseConfigured}
+              onClick={handleGoogleSignIn}
+              className="google-sign-in-button"
+              style={{ width: '100%' }}
+            >
+              <FaGoogle /> Continue with Google
             </Button>
           </form>
         </div>

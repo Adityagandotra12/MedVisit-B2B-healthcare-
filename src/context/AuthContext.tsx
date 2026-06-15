@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { auth, isFirebaseConfigured, missingFirebaseEnvKeys } from '../services/firebase';
-import { loginWithEmailPassword } from '../services/auth';
+import { loginWithEmailPassword, loginWithGoogle } from '../services/auth';
 
 interface AuthState {
   user: User | null;
@@ -25,6 +25,7 @@ type AuthAction =
 
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isFirebaseConfigured: boolean;
   missingFirebaseEnvKeys: readonly string[];
@@ -65,6 +66,15 @@ const mapAuthError = (error: unknown): string => {
   }
   if (authError?.code === 'auth/too-many-requests') {
     return 'Too many attempts. Try again later.';
+  }
+  if (authError?.code === 'auth/popup-closed-by-user') {
+    return 'Google sign-in was cancelled.';
+  }
+  if (authError?.code === 'auth/popup-blocked') {
+    return 'Popup blocked. Allow popups for this site and try again.';
+  }
+  if (authError?.code === 'auth/account-exists-with-different-credential') {
+    return 'This email is registered with email/password. Sign in with email instead.';
   }
   return 'Unable to sign in. Please try again.';
 };
@@ -117,6 +127,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const loginWithGoogleHandler = useCallback(async () => {
+    dispatch({ type: 'AUTH_LOADING', payload: true });
+    dispatch({ type: 'AUTH_ERROR', payload: null });
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      dispatch({ type: 'AUTH_ERROR', payload: mapAuthError(error) });
+      throw error;
+    } finally {
+      dispatch({ type: 'AUTH_LOADING', payload: false });
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     if (!auth) {
       return;
@@ -133,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return {
         ...state,
         login,
+        loginWithGoogle: loginWithGoogleHandler,
         logout,
         isFirebaseConfigured,
         missingFirebaseEnvKeys,
@@ -142,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         doctorName,
       };
     },
-    [login, logout, state],
+    [login, loginWithGoogleHandler, logout, state],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
