@@ -1,7 +1,8 @@
 import {
+  getRedirectResult,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
 } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from './firebase';
 
@@ -19,5 +20,13 @@ export async function loginWithEmailPassword(email: string, password: string) {
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  return signInWithPopup(assertFirebaseAuth(), provider);
+  // Redirect avoids popup blockers on Vercel and mobile browsers.
+  await signInWithRedirect(assertFirebaseAuth(), provider);
+}
+
+export async function completeGoogleRedirectSignIn() {
+  if (!auth || !isFirebaseConfigured) {
+    return null;
+  }
+  return getRedirectResult(auth);
 }

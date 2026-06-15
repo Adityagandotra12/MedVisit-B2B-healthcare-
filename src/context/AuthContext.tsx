@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { auth, isFirebaseConfigured, missingFirebaseEnvKeys } from '../services/firebase';
-import { loginWithEmailPassword, loginWithGoogle } from '../services/auth';
+import { loginWithEmailPassword, loginWithGoogle, completeGoogleRedirectSignIn } from '../services/auth';
 
 interface AuthState {
   user: User | null;
@@ -118,6 +118,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    dispatch({ type: 'AUTH_LOADING', payload: true });
+
+    void completeGoogleRedirectSignIn()
+      .catch((error) => {
+        dispatch({ type: 'AUTH_ERROR', payload: mapAuthError(error) });
+      })
+      .finally(() => {
+        dispatch({ type: 'AUTH_LOADING', payload: false });
+      });
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       dispatch({ type: 'AUTH_INIT', payload: user });
     });
@@ -143,11 +153,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'AUTH_ERROR', payload: null });
     try {
       await loginWithGoogle();
+      // Page redirects to Google; loading stays true until return.
     } catch (error) {
       dispatch({ type: 'AUTH_ERROR', payload: mapAuthError(error) });
-      throw error;
-    } finally {
       dispatch({ type: 'AUTH_LOADING', payload: false });
+      throw error;
     }
   }, []);
 

@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const formError = useMemo(() => validateLoginForm(email, password), [email, password]);
 
@@ -38,10 +39,11 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
     try {
       await loginWithGoogle();
     } catch {
-      // Error already tracked by context state.
+      setGoogleLoading(false);
     }
   };
 
@@ -119,12 +121,12 @@ export default function LoginPage() {
             <Button
               type="button"
               variant="secondary"
-              disabled={loading || !isFirebaseConfigured}
+              disabled={loading || googleLoading || !isFirebaseConfigured}
               onClick={handleGoogleSignIn}
               className="google-sign-in-button"
               style={{ width: '100%' }}
             >
-              <FaGoogle /> Continue with Google
+              <FaGoogle /> {googleLoading ? 'Redirecting to Google...' : 'Continue with Google'}
             </Button>
           </form>
         </div>
