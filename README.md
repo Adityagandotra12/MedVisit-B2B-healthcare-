@@ -206,7 +206,7 @@ src/
 4. Enable Firebase Authentication:
    - **Email/Password** sign-in provider
    - **Google** sign-in provider (Authentication -> Sign-in method -> Google -> Enable)
-   - Add your domains under Authentication -> Settings -> **Authorized domains** (`localhost`, your Vercel URL)
+   - Add your domains under Authentication -> Settings -> **Authorized domains** (`localhost`, your Netlify URL e.g. `your-app.netlify.app`)
 5. Verify env file (on every new machine):
    ```bash
    npm run verify-env
@@ -233,9 +233,21 @@ If `verify-env` fails:
 | Wrong folder | `cd` into the cloned repo root, not a parent folder |
 | Windows saved as `.env.local.txt` | Enable "File name extensions", rename to `.env.local` |
 | Dev server already running | Stop it (Ctrl+C), then `npm run dev` again |
-| Vercel / production URL | Add the same `VITE_FIREBASE_*` vars in Vercel -> Settings -> Environment Variables, then redeploy |
+| Netlify / production URL | Add the same `VITE_FIREBASE_*` vars in Netlify -> Site configuration -> Environment variables, then redeploy |
 
 `.env.local` is **not** in Git (ignored by `*.local`). You must create it on every laptop.
+
+### Deploy on Netlify
+
+1. Connect this repo to Netlify.
+2. Build command: `npm run build`
+3. Publish directory: `dist`
+4. Add all 6 `VITE_FIREBASE_*` environment variables in Netlify (same values as `.env.local`).
+5. Redeploy after adding env vars.
+6. In Firebase **Authorized domains**, add your Netlify URL (e.g. `your-app.netlify.app`).
+7. In Google Cloud **Credentials**, add `https://your-app.netlify.app` to API key HTTP referrers and OAuth JavaScript origins.
+
+`netlify.toml` and `public/_redirects` are included so Google sign-in redirect returns to the app instead of a 404.
 
 ## Scripts
 

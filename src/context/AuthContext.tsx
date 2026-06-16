@@ -83,7 +83,7 @@ const mapAuthError = (error: unknown): string => {
         ? 'Cannot reach Firebase from this site. In Google Cloud → Credentials → API key, allow HTTP referrers for your deployed domain (e.g. https://*.netlify.app/*).'
         : 'Network error. Check your connection and try again.';
     case 'auth/internal-error':
-      return 'Google sign-in failed. Enable Google in Firebase and add your Vercel domain to Authorized domains.';
+      return 'Google sign-in failed. Enable Google in Firebase and add your Netlify domain to Authorized domains.';
     default:
       if (code) {
         return `Unable to sign in (${code}). Check Firebase Google sign-in and authorized domains.`;
@@ -143,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => {
         redirectProcessed = true;
         dispatch({ type: 'AUTH_INIT', payload: authInstance.currentUser });
+        dispatch({ type: 'AUTH_LOADING', payload: false });
       });
 
     return () => unsubscribe();
