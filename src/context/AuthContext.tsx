@@ -75,12 +75,12 @@ const mapAuthError = (error: unknown): string => {
     case 'auth/account-exists-with-different-credential':
       return 'This email is registered with email/password. Sign in with email instead.';
     case 'auth/unauthorized-domain':
-      return 'This domain is not authorized in Firebase. Add your Vercel URL (e.g. your-app.vercel.app) under Authentication → Settings → Authorized domains.';
+      return 'This domain is not authorized in Firebase. Add your site URL (e.g. your-app.netlify.app or vercel.app) under Authentication → Settings → Authorized domains.';
     case 'auth/operation-not-allowed':
       return 'Google sign-in is not enabled. Turn on Google in Firebase Authentication → Sign-in method.';
     case 'auth/network-request-failed':
       return import.meta.env.PROD
-        ? 'Cannot reach Firebase from this site. In Google Cloud → Credentials → API key, allow HTTP referrers: https://*.vercel.app/* and https://med-visit-b2-b-healthcare.vercel.app/*'
+        ? 'Cannot reach Firebase from this site. In Google Cloud → Credentials → API key, allow HTTP referrers for your deployed domain (e.g. https://*.netlify.app/*).'
         : 'Network error. Check your connection and try again.';
     case 'auth/internal-error':
       return 'Google sign-in failed. Enable Google in Firebase and add your Vercel domain to Authorized domains.';
@@ -121,10 +121,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const authInstance = auth;
+    let redirectProcessed = false;
 
-    // Subscribe BEFORE getRedirectResult — otherwise the post-redirect sign-in event is missed.
+    // Ignore the initial null auth event until Google redirect sign-in is resolved.
     const unsubscribe = onAuthStateChanged(authInstance, (user) => {
-      dispatch({ type: 'AUTH_INIT', payload: user });
+      if (redirectProcessed || user) {
+        dispatch({ type: 'AUTH_INIT', payload: user });
+      }
     });
 
     void completeGoogleRedirectSignIn()
@@ -136,6 +139,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch((error) => {
         dispatch({ type: 'AUTH_ERROR', payload: mapAuthError(error) });
+      })
+      .finally(() => {
+        redirectProcessed = true;
+        dispatch({ type: 'AUTH_INIT', payload: authInstance.currentUser });
       });
 
     return () => unsubscribe();
