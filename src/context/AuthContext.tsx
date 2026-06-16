@@ -118,14 +118,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const authInstance = auth;
+
     // Subscribe BEFORE getRedirectResult — otherwise the post-redirect sign-in event is missed.
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
       dispatch({ type: 'AUTH_INIT', payload: user });
     });
 
     void completeGoogleRedirectSignIn()
       .then((result) => {
-        const signedInUser = result?.user ?? auth.currentUser;
+        const signedInUser = result?.user ?? authInstance.currentUser;
         if (signedInUser) {
           dispatch({ type: 'AUTH_INIT', payload: signedInUser });
         }
